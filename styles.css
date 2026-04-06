@@ -69,6 +69,25 @@ button:hover {
     transform: translateY(-2px);
 }
 
+.difficulty-btn {
+    background: #1e293b;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.difficulty-btn:hover {
+    background: #334155;
+}
+
+.difficulty-btn.bg-primary {
+    background: #8b5cf6;
+}
+
 .glass-panel {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
@@ -84,5 +103,9 @@ button:hover {
     }
     h1 {
         font-size: 2.5rem;
+    }
+    .difficulty-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
     }
 }
