@@ -5,7 +5,7 @@ const gameState = {
     gameActive: true,
     scores: { xWins: 0, oWins: 0, draws: 0 },
     aiEnabled: true,
-    aiDifficulty: 'easy' // easy, medium, hard
+    aiDifficulty: 'medium' // easy, medium, hard
 };
 
 const winningCombinations = [
@@ -17,7 +17,45 @@ const winningCombinations = [
 function initGame() {
     renderBoard();
     updateUI();
+    setupDifficultyButtons();
     document.getElementById('reset-btn').addEventListener('click', resetGame);
+}
+
+function setupDifficultyButtons() {
+    document.querySelectorAll('.difficulty-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const difficulty = this.getAttribute('data-difficulty');
+            setDifficulty(difficulty);
+        });
+    });
+    updateDifficultyUI();
+}
+
+function setDifficulty(difficulty) {
+    gameState.aiDifficulty = difficulty;
+    updateDifficultyUI();
+    // If it's AI's turn and game is active, trigger AI move with new difficulty
+    if (gameState.gameActive && gameState.aiEnabled && gameState.currentPlayer === 'O') {
+        setTimeout(makeAIMove, 300);
+    }
+}
+
+function updateDifficultyUI() {
+    // Update active button styling
+    document.querySelectorAll('.difficulty-btn').forEach(button => {
+        const difficulty = button.getAttribute('data-difficulty');
+        if (difficulty === gameState.aiDifficulty) {
+            button.classList.remove('bg-gray-800');
+            button.classList.add('bg-primary');
+        } else {
+            button.classList.remove('bg-primary');
+            button.classList.add('bg-gray-800');
+        }
+    });
+    // Update label
+    const difficultyLabel = document.getElementById('difficulty-label');
+    const difficultyText = gameState.aiDifficulty.charAt(0).toUpperCase() + gameState.aiDifficulty.slice(1);
+    difficultyLabel.textContent = `Current: ${difficultyText}`;
 }
 
 function renderBoard() {
@@ -74,16 +112,31 @@ function getRandomMove() {
 }
 
 function getSmartMove() {
-    // Simple AI: try to win or block
+    // Try to win
     for (let combo of winningCombinations) {
         const [a, b, c] = combo;
         if (gameState.board[a] === 'O' && gameState.board[b] === 'O' && gameState.board[c] === '') return c;
         if (gameState.board[a] === 'O' && gameState.board[c] === 'O' && gameState.board[b] === '') return b;
         if (gameState.board[b] === 'O' && gameState.board[c] === 'O' && gameState.board[a] === '') return a;
+    }
+    // Try to block
+    for (let combo of winningCombinations) {
+        const [a, b, c] = combo;
         if (gameState.board[a] === 'X' && gameState.board[b] === 'X' && gameState.board[c] === '') return c;
         if (gameState.board[a] === 'X' && gameState.board[c] === 'X' && gameState.board[b] === '') return b;
         if (gameState.board[b] === 'X' && gameState.board[c] === 'X' && gameState.board[a] === '') return a;
     }
+    // Take center if available
+    if (gameState.board[4] === '') return 4;
+    // Take corners
+    const corners = [0, 2, 6, 8];
+    const emptyCorners = corners.filter(idx => gameState.board[idx] === '');
+    if (emptyCorners.length > 0) return emptyCorners[Math.floor(Math.random() * emptyCorners.length)];
+    // Take any edge
+    const edges = [1, 3, 5, 7];
+    const emptyEdges = edges.filter(idx => gameState.board[idx] === '');
+    if (emptyEdges.length > 0) return emptyEdges[Math.floor(Math.random() * emptyEdges.length)];
+    // Fallback to random
     return getRandomMove();
 }
 
